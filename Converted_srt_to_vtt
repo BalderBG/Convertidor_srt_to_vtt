@@ -1,0 +1,32 @@
+import os
+import chardet
+
+def detect_encoding(file_path):
+    with open(file_path, "rb") as f:
+        result = chardet.detect(f.read())
+    return result["encoding"]
+
+def convert_srt_to_vtt(folder):
+    for file in os.listdir(folder):
+        if file.endswith(".srt"):
+            path_srt = os.path.join(folder, file)
+            path_vtt = os.path.join(folder, file.replace(".srt", ".vtt"))
+
+            encoding = detect_encoding(path_srt) 
+
+            with open(path_srt, "r", encoding=encoding) as f_srt:
+                lines = f_srt.readlines()
+
+            with open(path_vtt, "w", encoding="utf-8") as f_vtt:
+                f_vtt.write("WEBVTT\n\n")
+                for line in lines:
+                    f_vtt.write(line.replace(",", "."))
+
+            print(f"✅ Converted: {file} → {path_vtt}")
+
+if __name__ == "__main__":
+    folder_input = input("Enter the path to the folder containing the .srt files: ").strip()
+    if os.path.isdir(folder_input):
+        convert_srt_to_vtt(folder_input)
+    else:
+        print(" ////ERROR//// The route entered is invalid. Make sure you typed it correctly.")
